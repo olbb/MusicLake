@@ -68,6 +68,7 @@ object MusicApi {
                 else -> 128000
             }
         }
+        music.quality = quality
 
         val cachePath = FileUtils.getMusicCacheDir() + music.artist + " - " + music.title + "(" + quality + ")"
         val downloadPath = FileUtils.getMusicDir() + music.artist + " - " + music.title + ".mp3"

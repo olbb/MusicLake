@@ -1,8 +1,11 @@
 package com.cyl.musiclake.player.notification;
 
 import android.content.Context;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
+
+import androidx.annotation.NonNull;
 
 import com.cyl.musiclake.player.playback.PlaybackListener;
 import com.cyl.musiclake.utils.LogUtil;
@@ -51,6 +54,7 @@ public class Player implements MediaPlayer.OnErrorListener,
             player.setOnBufferingUpdateListener(this);
             player.setOnErrorListener(this);
             player.setOnCompletionListener(this);
+            getInfo(path);
         } catch (final IOException todo) {
             return false;
         } catch (final IllegalArgumentException todo) {
@@ -171,6 +175,21 @@ public class Player implements MediaPlayer.OnErrorListener,
         if (listener != null) {
             listener.onPrepared();
         }
+    }
+
+    private void getInfo(@NonNull String url) {
+        MediaMetadataRetriever metadataRetriever = new MediaMetadataRetriever();
+        metadataRetriever.setDataSource(url);
+        // 获得时长
+        String duration = metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+        // 获得名称
+        String name = metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+        // 获得媒体类型
+        String mediaType = metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE);
+        // 获得码率
+        String bitRate = metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE);
+        LogUtil.d(TAG, String.format("getMusicInfo,duration:%s, name:%s, bitRate:%s, mediaType:%s", duration, name, bitRate, mediaType));
+        metadataRetriever.release();
     }
 
     private class TrackErrorInfo {

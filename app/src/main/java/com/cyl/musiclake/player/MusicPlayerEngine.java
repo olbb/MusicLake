@@ -1,5 +1,6 @@
 package com.cyl.musiclake.player;
 
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
@@ -8,12 +9,15 @@ import android.os.PowerManager;
 import android.preference.Preference;
 import android.preference.PreferenceManager;
 
+import androidx.annotation.NonNull;
+
 import com.cyl.musiclake.MusicApp;
 import com.cyl.musiclake.bean.Music;
 import com.cyl.musiclake.utils.LogUtil;
 import com.danikula.videocache.HttpProxyCacheServer;
 
 import java.lang.ref.WeakReference;
+import java.util.HashMap;
 
 import static com.cyl.musiclake.player.MusicPlayerService.PLAYER_PREPARED;
 import static com.cyl.musiclake.player.MusicPlayerService.PREPARE_ASYNC_UPDATE;
@@ -77,6 +81,7 @@ public class MusicPlayerEngine implements MediaPlayer.OnErrorListener,
             player.setOnErrorListener(this);
             player.setOnCompletionListener(this);
             player.prepareAsync();
+//            getInfo(path);
         } catch (Exception todo) {
             LogUtil.e(TAG, "Exception:" + todo.getMessage());
             todo.printStackTrace();
@@ -217,6 +222,21 @@ public class MusicPlayerEngine implements MediaPlayer.OnErrorListener,
             Message message = mHandler.obtainMessage(PLAYER_PREPARED);
             mHandler.sendMessage(message);
         }
+    }
+
+    private void getInfo(@NonNull String url) {
+        MediaMetadataRetriever metadataRetriever = new MediaMetadataRetriever();
+        metadataRetriever.setDataSource(url, new HashMap<String, String>());
+        // 获得时长
+        String duration = metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+        // 获得名称
+        String name = metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+        // 获得媒体类型
+        String mediaType = metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE);
+        // 获得码率
+        String bitRate = metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE);
+        LogUtil.d(TAG, String.format("getMusicInfo,duration:%s, name:%s, bitRate:%s, mediaType:%s", duration, name, bitRate, mediaType));
+        metadataRetriever.release();
     }
 
     private class TrackErrorInfo {

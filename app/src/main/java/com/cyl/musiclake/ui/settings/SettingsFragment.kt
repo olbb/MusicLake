@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import androidx.preference.*
-import androidx.preference.PreferenceFragmentCompat
 import com.afollestad.materialdialogs.MaterialDialog
 import com.cyl.musiclake.Config
 import com.cyl.musiclake.MusicApp
@@ -13,7 +12,6 @@ import com.cyl.musiclake.common.Constants
 import com.cyl.musiclake.socket.SocketManager
 import com.cyl.musiclake.ui.base.BaseActivity
 import com.cyl.musiclake.ui.main.MainActivity
-import com.cyl.musiclake.ui.theme.ThemeStore
 import com.cyl.musiclake.utils.*
 
 /**
@@ -84,17 +82,21 @@ class SettingsFragment : PreferenceFragmentCompat(), Preference.OnPreferenceClic
         mPreferenceDownloadFile?.summary = FileUtils.getMusicDir()
         mPreferenceCacheFile?.summary = FileUtils.getMusicCacheDir()
 
-        mMusicQualityPreference?.summary = mMusicQualityPreference?.entry
+        val quality = (SPUtils.getAnyByKey(Constants.SP_KEY_SONG_QUALITY, 128000) / 1000).toString()
+        val index = mMusicQualityPreference?.entryValues?.indexOf(quality) ?: 0
+        mMusicQualityPreference?.summary = mMusicQualityPreference?.entries?.get(index)
         mMusicQualityPreference?.setOnPreferenceChangeListener { preference, newValue ->
             //把preference这个Preference强制转化为ListPreference类型
             val listPreference = preference as ListPreference
             //获取ListPreference中的实体内容
             val entries = listPreference.entries
+            val values = listPreference.entryValues
             //获取ListPreference中的实体内容的下标值
             val index = listPreference.findIndexOfValue(newValue as String)
             //把listPreference中的摘要显示为当前ListPreference的实体内容中选择的那个项目
             listPreference.summary = entries[index]
             ToastUtils.show("优先播放音质为：" + entries[index])
+            SPUtils.putAnyCommit(Constants.SP_KEY_SONG_QUALITY, values[index].toString().toInt() * 1000)
             false
         }
         mNightSwitch?.summary = mNightSwitch?.entry
